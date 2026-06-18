@@ -1,3 +1,6 @@
+# ============================================================
+## SGB – Sistema de Gestão Bancária
+# ============================================================
 USE mydb;
 
 CREATE TABLE IF NOT EXISTS departamentos (
@@ -21,5 +24,6 @@ CREATE TABLE IF NOT EXISTS contas (
     id         INT AUTO_INCREMENT PRIMARY KEY,
     cliente_id INT NOT NULL,
     tipo       VARCHAR(50) NOT NULL,
-    saldo      DECIMAL(12,2) DEFAULT 0.00
+    saldo      DECIMAL(12,2) DEFAULT 0.00,
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
 );
