@@ -1,62 +1,70 @@
-from db import conectar
+from db import conectar_mysql, registar_log
 
-class Cliente():
+class Cliente:
     def __init__(self, nome, email):
         self.nome = nome
         self.email = email
 
     def inserir(self):
-        conexao = conectar()
+        conexao = conectar_mysql()
         cursor = conexao.cursor()
         sql = "INSERT INTO clientes (nome, email) VALUES (%s, %s)"
-        valores = (self.nome, self.email)
-        cursor.execute(sql, valores)
+        cursor.execute(sql, (self.nome, self.email))
         conexao.commit()
-        print(f"Cliente {self.nome} inserido na BD")
+        novo_id = cursor.lastrowid
+        print(f"  Cliente '{self.nome}' inserido com sucesso (ID: {novo_id}).")
         cursor.close()
         conexao.close()
+        registar_log("auditoria", "criar_cliente", {"id": novo_id, "nome": self.nome, "email": self.email})
 
     @staticmethod
     def listar():
-        conexao = conectar()
+        conexao = conectar_mysql()
         cursor = conexao.cursor()
-        cursor.execute("SELECT id, nome, email FROM clientes")
+        cursor.execute("SELECT id, nome, email FROM clientes ORDER BY id")
         resultados = cursor.fetchall()
-
-        print("\n--- Lista Completa de Clientes ---")
-        for linha in resultados:
-            print(f"ID: {linha[0]} | Nome: {linha[1]} | Email: {linha[2]}")
-            print("-------------------------\n")
-
         cursor.close()
         conexao.close()
-    
-    @staticmethod
-    def atualizar(id, nome, email, self):
-        conexao = conectar()
-        cursor = conexao.cursor()
 
-        sql = "UPDATE clientes SET nome= %s, email= %s WHERE id= %s"
+        if not resultados:
+            print("  (Nenhum cliente registado.)")
+            return
+
+        print(f"\n  {'ID':<5} {'Nome':<30} {'Email'}")
+        print("  " + "-" * 60)
+        for linha in resultados:
+            print(f"  {linha[0]:<5} {linha[1]:<30} {linha[2]}")
+        print()
+
+    @staticmethod
+    def atualizar(id, nome, email):
+        conexao = conectar_mysql()
+        cursor = conexao.cursor()
+        sql = "UPDATE clientes SET nome=%s, email=%s WHERE id=%s"
         cursor.execute(sql, (nome, email, id))
         conexao.commit()
-
-        print(f"Cliente {self.nome} atualizado com sucesso")
-
+        linhas = cursor.rowcount
         cursor.close()
         conexao.close()
+
+        if linhas == 0:
+            print(f"  Nenhum cliente com ID {id} encontrado.")
+        else:
+            print(f"  Cliente ID {id} atualizado com sucesso.")
+            registar_log("auditoria", "atualizar_cliente", {"id": id, "nome": nome, "email": email})
 
     @staticmethod
-    def eliminar(id, self):
-        conexao = conectar()
+    def eliminar(id):
+        conexao = conectar_mysql()
         cursor = conexao.cursor()
-
-        cursor.execute("DELETE FROM clientes WHERE id= %s", (id,))
+        cursor.execute("DELETE FROM clientes WHERE id=%s", (id,))
         conexao.commit()
-
-        print(f"Cliente {self.nome} eliminado da BD")
-
+        linhas = cursor.rowcount
         cursor.close()
         conexao.close()
-cl1 = Cliente("Ana Paula", "anapaula@gmail.com")
 
-cl1.inserir()
+        if linhas == 0:
+            print(f"  Nenhum cliente com ID {id} encontrado.")
+        else:
+            print(f"  Cliente ID {id} eliminado.")
+            registar_log("auditoria", "eliminar_cliente", {"id": id})
