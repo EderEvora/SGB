@@ -1,0 +1,25 @@
+USE mydb;
+
+CREATE TABLE IF NOT EXISTS departamentos (
+    id   INT AUTO_INCREMENT PRIMARY KEY,
+    nome VARCHAR(100) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS clientes (
+    id    INT AUTO_INCREMENT PRIMARY KEY,
+    nome  VARCHAR(150) NOT NULL,
+    email VARCHAR(150) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS colaboradores (
+    id    INT AUTO_INCREMENT PRIMARY KEY,
+    nome  VARCHAR(150) NOT NULL,
+    email VARCHAR(150) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS contas (
+    id         INT AUTO_INCREMENT PRIMARY KEY,
+    cliente_id INT NOT NULL,
+    tipo       VARCHAR(50) NOT NULL,
+    saldo      DECIMAL(12,2) DEFAULT 0.00
+);
