@@ -1,10 +1,10 @@
 import mysql.connector
 from pymongo import MongoClient
 from datetime import datetime
-from dotenv import load_dotenv
+import dotenv
 import os
 
-load_dotenv()
+dotenv.load_dotenv()
 
 
 # Conexão MySQL
